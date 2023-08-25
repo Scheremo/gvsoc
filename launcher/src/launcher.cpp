@@ -31,7 +31,6 @@
 #include <string>
 #include <sys/types.h>
 #include <signal.h>
-#include <sys/prctl.h>
 #include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -99,23 +98,24 @@ int gv_launch(void *handle)
 {
   gv_launcher_t *gv = (gv_launcher_t *)handle;
 
-  pid_t ppid_before_fork = getpid();
-  child_id = fork();
-  if(child_id == -1) {
-    return -1;
-  } else if (child_id == 0) {
-    int r = prctl(PR_SET_PDEATHSIG, SIGTERM);
-    if (r == -1) { perror(0); exit(1); }
-    // test in case the original parent exited just
-    // before the prctl() call
-    if (getppid() != ppid_before_fork) exit(1);
-    gv_process(gv);
-    return 0;
-  } else {
-    //replyFile = fdopen(replyPipe[0], "r");
+  int p[2];
+  int buf;
+  pipe(p);
+  pid_t child = fork();
+  if (child == 0) {
+    close(p[1]); // close write end of pipe
+    setpgid(0, 0); // prevent ^C in parent from stopping this process
+    child = fork();
+    if (child == 0) {
+      close(p[0]); // close read end of pipe (don't need it here)
+      gv_process(gv);
+      exit(0);
+    }
+    read(p[0], &buf, 1); // returns when parent exits for any reason
+    kill(child, 9);
+    exit(0);
   }
-
-
+ 
   return 0;
 }
 

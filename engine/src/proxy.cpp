@@ -43,7 +43,6 @@
 #include <gv/gvsoc.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/prctl.h>
 #include <vp/time/time_scheduler.hpp>
 #include <vp/proxy.hpp>
 
@@ -317,7 +316,7 @@ int Gv_proxy::open(int port, int *out_port)
             return -1;
         }
 
-        if (bind(this->telnet_socket, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        if (::bind(this->telnet_socket, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
             fprintf(stderr, "Unable to bind the socket: %s\n", strerror(errno));
             return -1;
         }

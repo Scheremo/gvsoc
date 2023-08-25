@@ -26,7 +26,11 @@
 #include <vp/vp.hpp>
 #include "i2s_verif.hpp"
 #ifdef USE_SNDFILE
+#if !(__APPLE__)
 #include <sndfile.hh>
+#else
+#include <sndfile.h>
+#endif
 #endif
 
 class Slot;
