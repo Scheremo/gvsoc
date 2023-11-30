@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16.3)
 
 project(gvsoc)
 
+set(CMAKE_CXX_STANDARD 17)
+
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
     set(CMAKE_C_COMPILER_LAUNCHER   ccache)
